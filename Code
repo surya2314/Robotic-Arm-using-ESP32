@@ -1,0 +1,81 @@
+#include <Servo.h>
+
+// Define the servo objects
+Servo baseServo;   // Servo for rotating the entire arm horizontally
+Servo armServo;    // Servo for moving the arm vertically
+Servo gripperServo; // Servo for controlling the gripper or other end-effector
+
+// Define the servo pin numbers
+const int baseServoPin = 18;
+const int armServoPin = 19;
+const int gripperServoPin = 21;
+
+// Define the initial positions for the servos
+int basePos = 90;
+int armPos = 90;
+int gripperPos = 90;
+
+// Define the servo movement range
+const int minAngle = 0;
+const int maxAngle = 180;
+
+void setup() {
+  // Attach the servos to their respective pins
+  baseServo.attach(baseServoPin);
+  armServo.attach(armServoPin);
+  gripperServo.attach(gripperServoPin);
+
+  // Initialize the servos to their initial positions
+  baseServo.write(basePos);
+  armServo.write(armPos);
+  gripperServo.write(gripperPos);
+
+  // Begin serial communication for debugging or control input
+  Serial.begin(115200);
+}
+
+void loop() {
+  // Check for serial input and adjust servo positions accordingly
+  if (Serial.available() > 0) {
+    char command = Serial.read();
+    switch (command) {
+      case 'a': // Rotate arm left
+        basePos = constrain(basePos - 5, minAngle, maxAngle);
+        baseServo.write(basePos);
+        break;
+      case 'd': // Rotate arm right
+        basePos = constrain(basePos + 5, minAngle, maxAngle);
+        baseServo.write(basePos);
+        break;
+      case 'w': // Move arm up
+        armPos = constrain(armPos - 5, minAngle, maxAngle);
+        armServo.write(armPos);
+        break;
+      case 's': // Move arm down
+        armPos = constrain(armPos + 5, minAngle, maxAngle);
+        armServo.write(armPos);
+        break;
+      case 'q': // Close gripper
+        gripperPos = constrain(gripperPos - 5, minAngle, maxAngle);
+        gripperServo.write(gripperPos);
+        break;
+      case 'e': // Open gripper
+        gripperPos = constrain(gripperPos + 5, minAngle, maxAngle);
+        gripperServo.write(gripperPos);
+        break;
+      default:
+        break;
+    }
+
+    // Print current servo positions for debugging
+    Serial.print("Base Servo: ");
+    Serial.print(basePos);
+    Serial.print(" Arm Servo: ");
+    Serial.print(armPos);
+    Serial.print(" Gripper Servo: ");
+    Serial.println(gripperPos);
+  }
+
+  // Small delay to prevent overwhelming the serial monitor
+  delay(20);
+}
